@@ -67,11 +67,15 @@ function emit($item, item) {
 };
 
 function parse(text) {
-  let lines = lines.trim().split('\n')
-  let specs = []
+  let lines = text.trim().split('\n')
+  let props = {}
+  let name = lines.shift()
+  props['name'] = name
   for (line of lines) {
     let [key, value] = line.split(':')
+    props[key] = value
   }
+  return props
 }
 
 function bind($item, item) {
@@ -85,13 +89,15 @@ function bind($item, item) {
       specs.push($(spec).data('item').text)
     }
     let $table = $('<table>').appendTo($item)
-    let $th = $('<th>').appendTo($table)
-    let columns = item.text.trim().split(" ")
+    let $th_tr = $('<tr>').appendTo($table)
+    let columns = ['name']
+    columns.concat(item.text.trim().split(" "))
     for (column of columns) {
-      $th.append($('<td>').text(column))
+      let $th = $('<th>').appendTo($th_tr).text(column)
       let $tr = $('<tr>').appendTo($table)
       for (spec of specs) {
-        $tr.append($('<td>').text(spec))
+        let props = parse(spec)
+        $tr.append($('<td>').text(props[column]))
       }
     }
     console.log('specs', specs)
