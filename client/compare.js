@@ -84,18 +84,46 @@ function bind($item, item) {
   let sources = []
   if (candidates.size()) {
     $item.empty()
+    let style = `
+    table {
+      border-collapse: collapse;
+    }
+
+    tr, td, th {
+      border: 1px solid black;
+      padding: 5px;
+    }
+
+    thead tr {
+      background-color: #a8a8a8;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #e8e8e8;
+    }
+    `
+    $('<style>').html(style).appendTo($item)
     let specs = []
     for (spec of candidates.toArray()) {
       specs.push($(spec).data('item').text)
     }
-    let $table = $('<table>').appendTo($item)
-    let $th_tr = $('<tr>').appendTo($table)
+    let $table = $('<table>').appendTo($item).css('border-collapse', 'collapse')
+    let $thead = $('<thead>').appendTo($table)
+    let $tbody = $('<tbody>').appendTo($table)
+    let $th_tr = $('<tr>').appendTo($thead)
     let columns = ['name']
-    columns.concat(item.text.trim().split(" "))
+    columns = columns.concat(item.text.trim().split(" "))
+    console.log(columns)
     for (column of columns) {
       let $th = $('<th>').appendTo($th_tr).text(column)
+    }
+    for (spec of specs) {
       let $tr = $('<tr>').appendTo($table)
-      for (spec of specs) {
+      for (column of columns) {
         let props = parse(spec)
         $tr.append($('<td>').text(props[column]))
       }
