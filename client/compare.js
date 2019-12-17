@@ -66,7 +66,7 @@ function emit($item, item) {
   });
 };
 
-function parse(text) {
+function parse_spec(text) {
   let lines = text.trim().split('\n')
   let props = {}
   let name = lines.shift()
@@ -76,6 +76,20 @@ function parse(text) {
     props[key] = value
   }
   return props
+}
+
+function parse_config(text) {
+  let lines = text.trim().split('\n')
+  let orient = 'horiz'
+  let cols = ['name']
+  for (line of lines) {
+    if (line == 'vert' || line == 'horiz') {
+      orient = line
+      continue
+    }
+    cols = cols.concat(line.trim().split(" "))
+  }
+  return { orient, cols }
 }
 
 function bind($item, item) {
@@ -94,7 +108,7 @@ function bind($item, item) {
       padding: 5px;
     }
 
-    thead tr {
+    th {
       background-color: #a8a8a8;
     }
 
@@ -114,18 +128,28 @@ function bind($item, item) {
     let $table = $('<table>').appendTo($item).css('border-collapse', 'collapse')
     let $thead = $('<thead>').appendTo($table)
     let $tbody = $('<tbody>').appendTo($table)
-    let $th_tr = $('<tr>').appendTo($thead)
-    let columns = ['name']
-    columns = columns.concat(item.text.trim().split(" "))
-    console.log(columns)
-    for (column of columns) {
-      let $th = $('<th>').appendTo($th_tr).text(column)
+    let config = parse_config(item.text)
+    if (config.orient == "horiz") {
+      let $th_tr = $('<tr>').appendTo($thead)
+      for (column of config.cols) {
+        let $th = $('<th>').appendTo($th_tr).text(column)
+      }
+      for (spec of specs) {
+        let $tr = $('<tr>').appendTo($table)
+        for (column of config.cols) {
+          let props = parse_spec(spec)
+          $tr.append($('<td>').text(props[column]))
+        }
+      }
     }
-    for (spec of specs) {
-      let $tr = $('<tr>').appendTo($table)
-      for (column of columns) {
-        let props = parse(spec)
-        $tr.append($('<td>').text(props[column]))
+    if (config.orient == "vert") {
+      for (column of config.cols) {
+        let $tr = $('<tr>').appendTo($tbody)
+        $('<th>').text(column).appendTo($tr)
+        for (spec of specs) {
+          props = parse_spec(spec)
+          $('<td>').text(props[column]).appendTo($tr)
+        }
       }
     }
     console.log('specs', specs)
