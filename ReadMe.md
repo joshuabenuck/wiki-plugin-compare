@@ -19,7 +19,7 @@ Specify the columns to display by putting them on a single line separated by spa
 The first example on this page was configured as follows:
 ```
 horiz
-cpu ram gpu
+name cpu ram gpu
 ```
 
 The rows (for a horizontal layout) or the columns (for a vertical layout) are pulled from `specs` items up and to the left of the `compare` item.

@@ -69,11 +69,9 @@ function emit($item, item) {
 function parse_spec(text) {
   let lines = text.trim().split('\n')
   let props = {}
-  let name = lines.shift()
-  props['name'] = name
   for (line of lines) {
     let [key, value] = line.split(':')
-    props[key] = value
+    props[key.toLowerCase()] = value
   }
   return props
 }
@@ -81,7 +79,7 @@ function parse_spec(text) {
 function parse_config(text) {
   let lines = (text||'').trim().split('\n')
   let orient = 'horiz'
-  let cols = ['name']
+  let cols = []
   for (line of lines) {
     if (line == 'vert' || line == 'horiz') {
       orient = line
@@ -138,7 +136,7 @@ function bind($item, item) {
         let $tr = $('<tr>').appendTo($table)
         for (column of config.cols) {
           let props = parse_spec(spec)
-          $tr.append($('<td>').text(props[column]))
+          $tr.append($('<td>').text(props[column.toLowerCase()]))
         }
       }
     }
@@ -148,7 +146,7 @@ function bind($item, item) {
         $('<th>').text(column).appendTo($tr)
         for (spec of specs) {
           props = parse_spec(spec)
-          $('<td>').text(props[column]).appendTo($tr)
+          $('<td>').text(props[column.toLowerCase()]).appendTo($tr)
         }
       }
     }
