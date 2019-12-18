@@ -79,7 +79,7 @@ function parse_spec(text) {
 }
 
 function parse_config(text) {
-  let lines = text.trim().split('\n')
+  let lines = (text||'').trim().split('\n')
   let orient = 'horiz'
   let cols = ['name']
   for (line of lines) {
