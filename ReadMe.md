@@ -6,20 +6,20 @@ This plugin, type: compare, allows one to compare multiple specs.
 
 Edit a `compare` item to configure it.
 
-If the first line of the item is `horiz`, the display will look like:
+If you specify an `orientation` of `horizontal`, the display will look like:
 ![horizontal](screenshots/horizontal.png)
 
-If the first line of the item is 'vert', the display will look like:
+If specify an `orientation` of `vertical`, the display will look like:
 ![vertical](screenshots/vertical.png)
 
-The default display layout is `horiz` if no layout is specified.
+The default display layout is `horizontal` if no layout is specified.
 
-Specify the columns to display by putting them on a single line separated by spaces.
+Specify the columns to display by adding a property called `columns`. The value should be a comma separated list.
 
 The first example on this page was configured as follows:
 ```
-horiz
-name cpu ram gpu
+orientation: horizontal
+columns: name, cpu, ram, gpu
 ```
 
 The rows (for a horizontal layout) or the columns (for a vertical layout) are pulled from `specs` items up and to the left of the `compare` item.

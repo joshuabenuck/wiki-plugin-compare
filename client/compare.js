@@ -67,26 +67,44 @@ function emit($item, item) {
 };
 
 function parse_spec(text) {
-  let lines = text.trim().split('\n')
+  let lines = (text||'').trim().split('\n')
   let props = {}
   for (line of lines) {
+    if (line[0] == '#') {
+      continue;
+    }
     let [key, value] = line.split(':')
+    // Skip system properties
+    if (key == key.toUpperCase()) {
+      continue
+    }
     props[key.toLowerCase()] = value
   }
+  console.log('props', props)
   return props
 }
 
 function parse_config(text) {
   let lines = (text||'').trim().split('\n')
-  let orient = 'horiz'
-  let cols = []
+  let orient = 'horizontal'
+  let cols = undefined
   for (line of lines) {
-    if (line == 'vert' || line == 'horiz') {
-      orient = line
-      continue
+    if (line[0] == '#') {
+      continue;
     }
-    cols = cols.concat(line.trim().split(" "))
+    let [key, value] = line.split(':')
+    if (key == 'orientation') {
+      orient = value.trim()
+    }
+    else if (key == 'columns') {
+      cols = value.trim().split(",")
+      cols = cols.map((c) => c.trim())
+    }
+    else {
+      console.log(`Warning: Unrecognized key '${key}'`)
+    }
   }
+  console.log('columns', cols)
   return { orient, cols }
 }
 
@@ -120,35 +138,42 @@ function bind($item, item) {
     `
     $('<style>').html(style).appendTo($item)
     let specs = []
+    let all_columns = new Set()
     for (spec of candidates.toArray()) {
-      specs.push($(spec).data('item').text)
+      let props = parse_spec($(spec).data('item').text)
+      specs.push(props)
+      for (key of Object.keys(props)) {
+        all_columns.add(key)
+      }
     }
     let $table = $('<table>').appendTo($item).css('border-collapse', 'collapse')
     let $thead = $('<thead>').appendTo($table)
     let $tbody = $('<tbody>').appendTo($table)
     let config = parse_config(item.text)
-    if (config.orient == "horiz") {
+    if (config.orient == "horizontal") {
       let $th_tr = $('<tr>').appendTo($thead)
-      for (column of config.cols) {
+      for (column of (config.cols || all_columns)) {
         let $th = $('<th>').appendTo($th_tr).text(column)
       }
       for (spec of specs) {
         let $tr = $('<tr>').appendTo($table)
-        for (column of config.cols) {
-          let props = parse_spec(spec)
-          $tr.append($('<td>').text(props[column.toLowerCase()]))
+        for (column of (config.cols || all_columns)) {
+          $tr.append($('<td>').text(spec[column.toLowerCase()]))
         }
       }
     }
-    if (config.orient == "vert") {
-      for (column of config.cols) {
+    else if (config.orient == "vertical") {
+      for (column of (config.cols || all_columns)) {
         let $tr = $('<tr>').appendTo($tbody)
         $('<th>').text(column).appendTo($tr)
         for (spec of specs) {
-          props = parse_spec(spec)
-          $('<td>').text(props[column.toLowerCase()]).appendTo($tr)
+          $('<td>').text(spec[column.toLowerCase()]).appendTo($tr)
         }
       }
+    }
+    else {
+      $item.empty()
+      $item.append(`Unrecognized orientation: '${config.orient}'`)
     }
     console.log('specs', specs)
     return
