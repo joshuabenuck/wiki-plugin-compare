@@ -71,11 +71,19 @@ function parse_spec(text) {
   let props = {}
   for (line of lines) {
     if (line[0] == '#') {
-      continue;
+      continue
     }
-    let [key, value] = line.split(':')
-    // Skip system properties
+    // Handle values with colons
+    let value = undefined
+    let key = line
+    let colon_index = line.indexOf(':')
+    if (colon_index != -1) {
+      key = line.substring(0, colon_index).trim()
+      value = line.substring(colon_index+1, line.length).trim()
+    }
+    // Keep system properties uppercase
     if (key == key.toUpperCase()) {
+      props[key] = value
       continue
     }
     props[key.toLowerCase()] = value
@@ -88,6 +96,7 @@ function parse_config(text) {
   let lines = (text||'').trim().split('\n')
   let orient = 'horizontal'
   let cols = undefined
+  let type = undefined
   for (line of lines) {
     if (line[0] == '#') {
       continue;
@@ -95,6 +104,9 @@ function parse_config(text) {
     let [key, value] = line.split(':')
     if (key == 'orientation') {
       orient = value.trim()
+    }
+    else if (key == 'type') {
+      type = value.trim()
     }
     else if (key == 'columns') {
       cols = value.trim().split(",")
@@ -105,7 +117,7 @@ function parse_config(text) {
     }
   }
   console.log('columns', cols)
-  return { orient, cols }
+  return { orient, cols, type }
 }
 
 function bind($item, item) {
@@ -139,17 +151,28 @@ function bind($item, item) {
     $('<style>').html(style).appendTo($item)
     let specs = []
     let all_columns = new Set()
+    let config = parse_config(item.text)
     for (spec of candidates.toArray()) {
       let props = parse_spec($(spec).data('item').text)
-      specs.push(props)
       for (key of Object.keys(props)) {
+        if (key == key.toUpperCase()) {
+          continue
+        }
         all_columns.add(key)
       }
+      if (config.type && config.type != props['TYPE']) {
+        continue
+      }
+      specs.push(props)
+    }
+    if (specs.length == 0 && config.type) {
+      $item.empty()
+      $item.append(`No specs found of type: ${config.type}`)
+      return
     }
     let $table = $('<table>').appendTo($item).css('border-collapse', 'collapse')
     let $thead = $('<thead>').appendTo($table)
     let $tbody = $('<tbody>').appendTo($table)
-    let config = parse_config(item.text)
     if (config.orient == "horizontal") {
       let $th_tr = $('<tr>').appendTo($thead)
       for (column of (config.cols || all_columns)) {

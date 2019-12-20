@@ -28,6 +28,35 @@ To reorder the compared items, change the position of the corresponding `specs` 
 
 To change the columns or order of columns displayed, edit the `compare` item to change its configuration.
 
+## Filtering by Type
+
+If a lineup contains `specs` of different types of entities (say `laptop`s and `monitor`s), `compare` will attempt to compare all of them.
+
+To fix this, add a `TYPE` field to each `spec`, and then add a `type` property to the `compare` config to tell it to only display `spec`s of that type.
+
+Given these three `specs`:
+```
+model: Acme XYZ 17
+TYPE: laptop
+```
+
+```
+model: Acme XYZ 15
+TYPE: laptop
+```
+
+```
+model: 4k
+TYPE: monitor
+```
+
+This is how to configure the compare to only display the laptops:
+```
+orientation: vertical
+type: laptop
+columns: Model
+```
+
 ## Build
 
     npm install
