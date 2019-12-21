@@ -127,24 +127,24 @@ function bind($item, item) {
   if (candidates.size()) {
     $item.empty()
     let style = `
-    table {
+    .compare table {
       border-collapse: collapse;
     }
 
-    tr, td, th {
+    .compare tr, .compare td, .compare th {
       border: 1px solid black;
       padding: 5px;
     }
 
-    th {
+    .compare th {
       background-color: #a8a8a8;
     }
 
-    tbody tr:nth-child(odd) {
+    .compare tbody tr:nth-child(odd) {
       background-color: #ffffff;
     }
 
-    tbody tr:nth-child(even) {
+    .compare tbody tr:nth-child(even) {
       background-color: #e8e8e8;
     }
     `
